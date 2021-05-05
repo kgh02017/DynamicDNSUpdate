@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 #****************************************************************************
 #    ddns_update.sh - script to update AWS Route53 record
-#    version: 1.0.0
+#    version: 2.0.0
 #****************************************************************************
 
 ## Variables
@@ -10,33 +10,32 @@ APP_NAME='ddns_update.sh'
 APP_DATA_PATH='/opt/ddns_update'
 
 IP_INFO_WEB='ipinfo.io'
-IP_DATA_FILE=$APP_DATA_PATH/current_ip.dat
-CONF_FILE=$APP_DATA_PATH/ddns_update.conf
+IP_DATA_FILE=$APP_DATA_PATH/data/current_ip.dat
 
 ## Functions
 function log() {
-    logger -t $APP_NAME -p local0.notice -i $@ 
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${APP_NAME}: $@"
 }
 
 ## Main routine
 
 # Sanity check
 if !(type jq > /dev/null 2>&1) ||
-   !(type http > /dev/null 2>&1) ||
-   !(type logger > /dev/null 2>&1) ||
-   !(type cli53 > /dev/null 2>&1); then
+   !(type curl > /dev/null 2>&1) ||
+   !(type $CLI53 > /dev/null 2>&1); then
    echo "Some commands are missing"
    exit 1; 
 fi
 
-# Read configuration file
-if [ -f $CONF_FILE ]; then
-    source $CONF_FILE
-fi
+# ENV check
 if [ -z "$DNS_ZONE" ] ||
-   [ -z "$AWS_PROFILE" ] ; then
+   [ -z "$AWS_ACCESS_KEY_ID" ] ||
+   [ -z "$AWS_SECRET_ACCESS_KEY" ] ; then
    log "Some DNS data are missing"
    exit 1
+fi
+if [ -z "$CLI53" ] ; then
+    CLI53=/bin/cli53
 fi
 
 # Get old IP address
@@ -47,7 +46,7 @@ else
 fi
 
 # Get current IP address
-CURRENT_IP=`http $IP_INFO_WEB | jq -r '.ip'`
+CURRENT_IP=`curl -sS $IP_INFO_WEB | jq -r '.ip'`
 if [ -n "$CURRENT_IP" ]; then
     echo $CURRENT_IP > $IP_DATA_FILE
 else
@@ -64,7 +63,7 @@ else
 fi
 
 # Update Route53
-cli53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace --profile $AWS_PROFILE
+$CLI53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace
 if [ $? == 0 ]; then
     log "UPDATE ROUTE53 RECORD: SUCCESS" 
 else
