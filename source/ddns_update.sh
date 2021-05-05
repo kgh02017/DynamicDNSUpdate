@@ -10,8 +10,8 @@ APP_NAME='ddns_update.sh'
 APP_DATA_PATH='/opt/ddns_update'
 
 IP_INFO_WEB='ipinfo.io'
-IP_DATA_FILE=$APP_DATA_PATH/current_ip.dat
-CONF_FILE=$APP_DATA_PATH/ddns_update.conf
+IP_DATA_FILE=$APP_DATA_PATH/data/current_ip.dat
+CONF_FILE=$APP_DATA_PATH/conf/ddns_update.conf
 
 ## Functions
 function log() {
