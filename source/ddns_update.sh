@@ -11,7 +11,6 @@ APP_DATA_PATH='/opt/ddns_update'
 
 IP_INFO_WEB='ipinfo.io'
 IP_DATA_FILE=$APP_DATA_PATH/data/current_ip.dat
-CONF_FILE=$APP_DATA_PATH/conf/ddns_update.conf
 
 ## Functions
 function log() {
@@ -28,12 +27,10 @@ if !(type jq > /dev/null 2>&1) ||
    exit 1; 
 fi
 
-# Read configuration file
-if [ -f $CONF_FILE ]; then
-    source $CONF_FILE
-fi
+# ENV check
 if [ -z "$DNS_ZONE" ] ||
-   [ -z "$AWS_PROFILE" ] ; then
+   [ -z "$AWS_ACCESS_KEY_ID" ] ||
+   [ -z "$AWS_SECRET_ACCESS_KEY" ] ; then
    log "Some DNS data are missing"
    exit 1
 fi
@@ -63,7 +60,7 @@ else
 fi
 
 # Update Route53
-cli53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace --profile $AWS_PROFILE
+cli53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace
 if [ $? == 0 ]; then
     log "UPDATE ROUTE53 RECORD: SUCCESS" 
 else
