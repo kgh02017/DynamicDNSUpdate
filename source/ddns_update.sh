@@ -15,7 +15,7 @@ CONF_FILE=$APP_DATA_PATH/conf/ddns_update.conf
 
 ## Functions
 function log() {
-    logger -t $APP_NAME -p local0.notice $@
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${APP_NAME}: $@"
 }
 
 ## Main routine
@@ -23,7 +23,6 @@ function log() {
 # Sanity check
 if !(type jq > /dev/null 2>&1) ||
    !(type curl > /dev/null 2>&1) ||
-   !(type logger > /dev/null 2>&1) ||
    !(type cli53 > /dev/null 2>&1); then
    echo "Some commands are missing"
    exit 1; 
