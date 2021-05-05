@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #****************************************************************************
 #    ddns_update.sh - script to update AWS Route53 record
@@ -15,14 +15,14 @@ CONF_FILE=$APP_DATA_PATH/conf/ddns_update.conf
 
 ## Functions
 function log() {
-    logger -t $APP_NAME -p local0.notice -i $@ 
+    logger -t $APP_NAME -p local0.notice $@
 }
 
 ## Main routine
 
 # Sanity check
 if !(type jq > /dev/null 2>&1) ||
-   !(type http > /dev/null 2>&1) ||
+   !(type curl > /dev/null 2>&1) ||
    !(type logger > /dev/null 2>&1) ||
    !(type cli53 > /dev/null 2>&1); then
    echo "Some commands are missing"
@@ -47,7 +47,7 @@ else
 fi
 
 # Get current IP address
-CURRENT_IP=`http $IP_INFO_WEB | jq -r '.ip'`
+CURRENT_IP=`curl -sS $IP_INFO_WEB | jq -r '.ip'`
 if [ -n "$CURRENT_IP" ]; then
     echo $CURRENT_IP > $IP_DATA_FILE
 else
