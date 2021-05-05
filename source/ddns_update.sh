@@ -22,7 +22,7 @@ function log() {
 # Sanity check
 if !(type jq > /dev/null 2>&1) ||
    !(type curl > /dev/null 2>&1) ||
-   !(type cli53 > /dev/null 2>&1); then
+   !(type $CLI53 > /dev/null 2>&1); then
    echo "Some commands are missing"
    exit 1; 
 fi
@@ -33,6 +33,9 @@ if [ -z "$DNS_ZONE" ] ||
    [ -z "$AWS_SECRET_ACCESS_KEY" ] ; then
    log "Some DNS data are missing"
    exit 1
+fi
+if [ -z "$CLI53" ] ; then
+    CLI53=/bin/cli53
 fi
 
 # Get old IP address
@@ -60,7 +63,7 @@ else
 fi
 
 # Update Route53
-cli53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace
+$CLI53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace
 if [ $? == 0 ]; then
     log "UPDATE ROUTE53 RECORD: SUCCESS" 
 else
