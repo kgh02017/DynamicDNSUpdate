@@ -63,7 +63,7 @@ else
 fi
 
 # Update Route53
-$CLI53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace
+$CLI53 rrcreate --replace $DNS_ZONE "* A $CURRENT_IP"
 if [ $? == 0 ]; then
     log "UPDATE ROUTE53 RECORD: SUCCESS" 
 else
