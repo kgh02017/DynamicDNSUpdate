@@ -2,7 +2,7 @@
 
 #****************************************************************************
 #    ddns_update.sh - script to update AWS Route53 record
-#    version: 2.0.0
+#    version: 2.1.0
 #****************************************************************************
 
 ## Variables
@@ -63,7 +63,7 @@ else
 fi
 
 # Update Route53
-$CLI53 rrcreate $DNS_ZONE "* A $CURRENT_IP" --replace
+$CLI53 rrcreate --replace $DNS_ZONE "* A $CURRENT_IP"
 if [ $? == 0 ]; then
     log "UPDATE ROUTE53 RECORD: SUCCESS" 
 else

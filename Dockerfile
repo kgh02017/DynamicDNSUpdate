@@ -1,25 +1,17 @@
-FROM golang:1.16.3-alpine3.13 as build
-
-ENV GO111MODULE=on
-ENV GO15VENDOREXPERIMENT=1
-ENV CLI53_VER_TAG='0.8.17'
-
-WORKDiR $GOPATH/src
-RUN apk add --no-cache --virtual .build-deps git && \
-    git clone git://github.com/barnybug/cli53 --branch $CLI53_VER_TAG && \
-    cd cli53/cmd/cli53 && \
-    go build -a -tags "netgo" -installsuffix netgo -ldflags="-s -w -extldflags \"-static\"" && \
-    mv cli53 /bin/cli53 && \
-    apk del .build-deps
-
-
-FROM alpine:latest
-
+FROM registry.access.redhat.com/ubi9/ubi-minimal
 LABEL maintainer Taku Izumi <admin@orz-style.com>
 
+ENV CLI53_BASE_URL="https://github.com/barnybug/cli53/releases/download"
+ENV CLI53_VERSION='0.8.22'
+ENV CLI53_NAME="cli53-linux-amd64"
+ENV CLI53_URL="${CLI53_BASE_URL}/${CLI53_VERSION}/${CLI53_NAME}"
+
 WORKDIR /opt/ddns_update
-RUN apk add --no-cache curl jq
-COPY --from=build /bin/cli53 /bin/cli53
+RUN microdnf install -y jq && \
+    curl -L "${CLI53_URL}" -o cli53 && \
+    chmod 755 cli53 && \
+    mv cli53 /bin && \
+    microdnf clean all
 COPY ./source .
 
 CMD ["/opt/ddns_update/ddns_update.sh"]
